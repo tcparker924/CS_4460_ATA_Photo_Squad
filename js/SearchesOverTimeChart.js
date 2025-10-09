@@ -54,6 +54,8 @@ class SearchesOverTimeChart {
     wrangleData() {
         let vis = this;
 
+        this.displayData = this.data.filter(d => d.date > new Date("2019-01-01"));
+
         vis.updateVis();
     }
 
@@ -66,9 +68,18 @@ class SearchesOverTimeChart {
         vis.svg.select(".x-axis").call(vis.xAxis);
         vis.svg.select(".y-axis").call(vis.yAxis);
 
-        vis.path.datum(vis.displayData)
-            .transition()
-            .duration(800)
+        vis.path
+            .datum(vis.displayData)
             .attr("d", vis.line);
+
+        const totalLength = vis.path.node().getTotalLength();
+
+        vis.path
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+            .duration(2000)
+            .ease(d3.easeLinear)
+            .attr("stroke-dashoffset", 0);
     }
 }
