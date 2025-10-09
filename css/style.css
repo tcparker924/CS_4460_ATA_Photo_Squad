@@ -87,3 +87,8 @@ h2 {
 .x-axis path {
   display: none;
 }
+
+.searches-over-time-container {
+    width: 80vw;
+    height: 30vh
+}

@@ -1,32 +1,32 @@
 loadData();
 
+let searchesOverTimeChart;
+
 function loadData() {
-    d3.json("data/{data_placeholder}.json"). then(jsonData=>{
+    d3.csv("data/search-trends-ai-image-generator.csv").then(csvData => {
 
-        // prepare data
-        let data = prepareData(jsonData)
+        let searchTrendData = prepareSearchTrendData(csvData);
 
-        console.log('data loaded ')
+        console.log('Data loaded', searchTrendData);
 
+        searchesOverTimeChart = new SearchesOverTimeChart("searches-over-time-area", searchTrendData);
+    });
+}
 
-        // Now we will instatinate our charts, the following code is just an example:
-
-
-        // areachart = new StackedAreaChart("stacked-area-chart", data.layers)
-        // timeline = new Timeline("timeline", data.years)
-        // timeline.brushed = brushed;
-        //
-        // areachart.initVis();
-        // timeline.initVis()
-
+function prepareSearchTrendData(data) {
+    const parseTime = d3.utcParse("%Y-%m");
+    return data.map(d => {
+        return {
+            date: parseTime(d.Month),
+            value: parseLessThanValues(d.Value)
+        };
     });
 }
 
 
 
-function prepareData(data){
-    // Do any transformations needed for the data
-
-
-    return data
+function parseLessThanValues(val) {
+    if (val === "<1") return 0.5;
+    let num = +val;
+    return isNaN(num) ? 0 : num;
 }
