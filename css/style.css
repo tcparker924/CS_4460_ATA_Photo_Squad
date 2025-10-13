@@ -1,20 +1,25 @@
 
 body {
   font-family: 'Lato', sans-serif;
-  background-color: #D0C6B2;
 }
 
 h1 {
-  color: #865F3C;
   margin-top: 40px;
-  font-weight: 300;
+  font-weight: normal;
 }
 
 h2 {
   font-weight: 100;
   font-size: 20px;
   margin-bottom: 30px;
-  color: #906666;
+  color: lightgray;
+}
+
+h6 {
+    font-weight: 100;
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: lightgray;
 }
 
 /*************/
@@ -26,7 +31,6 @@ h2 {
 }
 
 .form-control {
-  background: #E2DDD1;
   border: 1px solid #D49999;
   width: 250px;
 }
@@ -88,7 +92,30 @@ h2 {
   display: none;
 }
 
+.container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .searches-over-time-container {
     width: 80vw;
-    height: 60vh
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.searches-over-time-area {
+    width: 80vw;
+    height: 60vh;
+}
+
+.searches-over-time-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+    margin: 0 auto;
 }

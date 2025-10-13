@@ -15,7 +15,26 @@
 
 <div class="container">
     <!-- Parent container for the visualization -->
-    <div id="searches-over-time-area" class = "searches-over-time-container"></div>
+    <div id="searches-over-time-container">
+        <h1>AI Image Generation Google Search Trend Data</h1>
+        <h6>Data for how the trends in Google searches have changed over time
+        with regards to different queries regarding AI image generation</h6>
+        <div id="searches-over-time-area" class = "searches-over-time-area"></div>
+        <div class="btn-group mt-3 searches-over-time-button-container" role="group" aria-label="Multi-select search filters" id="search-filter-buttons">
+            <input type="checkbox" checked class="btn-check" id="image_generator_check" autocomplete="off">
+            <label class="btn btn-outline-primary" for="image_generator_check">"AI image generator"</label>
+
+            <input type="checkbox" class="btn-check" id="ai_faces_check" autocomplete="off">
+            <label class="btn btn-outline-primary" for="ai_faces_check">"AI faces"</label>
+
+            <input type="checkbox" class="btn-check" id="photo_maker_check" autocomplete="off">
+            <label class="btn btn-outline-primary" for="photo_maker_check">"AI photo maker"</label>
+
+            <input type="checkbox" class="btn-check" id="ai_images_check" autocomplete="off">
+            <label class="btn btn-outline-primary" for="ai_images_check">"AI images"</label>
+        </div>
+    </div>
+
 
 </div>
 

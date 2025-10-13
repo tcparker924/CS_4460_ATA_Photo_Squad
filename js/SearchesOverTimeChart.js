@@ -1,15 +1,51 @@
 class SearchesOverTimeChart {
 
+
     constructor(parentElement, data) {
         this.parentElement = parentElement;
         this.data = data;
         this.displayData = data;
+        this.displayed_data = [1, 0, 0, 0];
 
         this.initVis();
     }
 
+
     initVis() {
         let vis = this;
+
+        d3.selectAll('#search-filter-buttons input[type="checkbox"]')
+            .on('change', function() {
+                const selectedCategories = d3.selectAll('#search-filter-buttons input[type="checkbox"]:checked')
+                    .nodes()
+                    .map(cb => cb.id);
+
+                if (selectedCategories.includes("image_generator_check")) {
+                    vis.displayed_data[0] = 1
+                } else {
+                    vis.displayed_data[0] = 0
+                }
+
+                if (selectedCategories.includes("ai_faces_check")) {
+                    vis.displayed_data[1] = 1
+                } else {
+                    vis.displayed_data[1] = 0
+                }
+
+                if (selectedCategories.includes("photo_maker_check")) {
+                    vis.displayed_data[2] = 1
+                } else {
+                    vis.displayed_data[2] = 0
+                }
+
+                if (selectedCategories.includes("ai_images_check")) {
+                    vis.displayed_data[3] = 1
+                } else {
+                    vis.displayed_data[3] = 0
+                }
+
+                vis.wrangleData();
+            });
 
         vis.margin = {top: 40, right: 40, bottom: 60, left: 60};
 
@@ -54,7 +90,9 @@ class SearchesOverTimeChart {
     wrangleData() {
         let vis = this;
 
-        this.displayData = this.data.filter(d => d.date > new Date("2019-01-01"));
+        Object.entries(this.data).forEach(([key, value]) => {
+            this.displayData[key] = this.data[key].filter(d => d.date > new Date("2019-01-01"));;
+        });
 
         vis.updateVis();
     }
@@ -62,24 +100,57 @@ class SearchesOverTimeChart {
     updateVis() {
         let vis = this;
 
-        vis.x.domain(d3.extent(vis.displayData, d => d.date));
-        vis.y.domain([0, d3.max(vis.displayData, d => d.value)]);
+        const dataKeys = Object.keys(vis.displayData);
+        const activeKeys = dataKeys.filter((key, i) => vis.displayed_data[i] === 1);
+
+        vis.x.domain(d3.extent(vis.displayData["ai-image-generator-data"], d => d.date));
+        vis.y.domain([0, d3.max(vis.displayData["ai-image-generator-data"], d => d.value)]);
 
         vis.svg.select(".x-axis").call(vis.xAxis);
         vis.svg.select(".y-axis").call(vis.yAxis);
 
-        vis.path
-            .datum(vis.displayData)
-            .attr("d", vis.line);
+        const lines = vis.svg.selectAll(".trend-line")
+            .data(activeKeys, d => d);
 
-        const totalLength = vis.path.node().getTotalLength();
+        lines.exit().remove();
 
-        vis.path
-            .attr("stroke-dasharray", totalLength + " " + totalLength)
-            .attr("stroke-dashoffset", totalLength)
-            .transition()
-            .duration(2000)
-            .ease(d3.easeLinear)
-            .attr("stroke-dashoffset", 0);
+        lines.transition()
+            .duration(1000)
+            .attr("d", d => vis.line(vis.displayData[d]));
+
+        let enteringLines = lines.enter()
+            .append("path")
+            .attr("class", "trend-line")
+            .attr("fill", "none")
+            .attr("stroke", (d, i) => d3.schemeCategory10[i % 10])
+            .attr("stroke-width", 2)
+            .attr("d", d => vis.line(vis.displayData[d]))
+            .attr("stroke-dasharray", function() {
+                const length = this.getTotalLength();
+                return length + " " + length;
+            })
+            .attr("stroke-dashoffset", function() {
+                return this.getTotalLength();
+            });
+
+        if (!enteringLines.empty()) {
+            setFilterButtonsDisabled(true);
+
+            enteringLines
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0)
+                .on("end", () => {
+                    setFilterButtonsDisabled(false);
+                });
+        }
+
+        // Helper function to make sure users can't interupt the line drawing
+        function setFilterButtonsDisabled(disabled) {
+            d3.selectAll('#search-filter-buttons input[type="checkbox"]')
+                .property('disabled', disabled);
+        }
     }
+
 }

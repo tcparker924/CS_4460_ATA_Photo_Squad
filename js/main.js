@@ -1,16 +1,30 @@
-loadData();
+let searchTrendsDataPath = "data/search-trends-ai-image-generator.csv";
+
+
+loadSearchTrendsData();
 
 let searchesOverTimeChart;
 
-function loadData() {
-    d3.csv("data/search-trends-ai-image-generator.csv").then(csvData => {
+function loadSearchTrendsData() {
+    d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
+        d3.csv("data/search-trends-ai-faces.csv").then(csvData2 => {
+            d3.csv("data/search-trends-ai-images.csv").then(csvData3 => {
+                d3.csv("data/search-trends-ai-photo-maker.csv").then(csvData4 => {
+                    let searchTrendData ={
+                        "ai-image-generator-data": prepareSearchTrendData(csvData1),
+                        "ai-faces-data": prepareSearchTrendData(csvData2),
+                        "ai-image-maker-data": prepareSearchTrendData(csvData3),
+                        "ai-photo-maker-data": prepareSearchTrendData(csvData4)
+                    };
 
-        let searchTrendData = prepareSearchTrendData(csvData);
+                    console.log('Data loaded', searchTrendData);
 
-        console.log('Data loaded', searchTrendData);
+                    searchesOverTimeChart = new SearchesOverTimeChart("searches-over-time-area", searchTrendData);
+                });
+            });
+        });
+});
 
-        searchesOverTimeChart = new SearchesOverTimeChart("searches-over-time-area", searchTrendData);
-    });
 }
 
 function prepareSearchTrendData(data) {
