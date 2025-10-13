@@ -137,6 +137,13 @@ h6 {
     flex-direction: column;
 }
 
+
+ /*
+ --------
+ BEGIN SEARCHES OVER TIME CSS SECTION
+ --------
+ */
+
 .searches-over-time-container {
     display: flex;
     align-items: center;
@@ -167,3 +174,9 @@ h6 {
     width: 70%;
     margin: 0 auto;
 }
+
+/*
+--------
+END SEARCHES OVER TIME CSS SECTION
+--------
+*/
