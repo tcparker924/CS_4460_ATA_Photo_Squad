@@ -118,11 +118,19 @@ class SearchesOverTimeChart {
             .duration(1000)
             .attr("d", d => vis.line(vis.displayData[d]));
 
+        const colorMap = {
+            "ai-image-generator-data": "#1f77b4",
+            "ai-faces-data": "#ff7f0e",
+            "ai-photo-maker-data": "#2ca02c",
+            "ai-image-maker-data": "#d62728"
+        };
+
         let enteringLines = lines.enter()
             .append("path")
             .attr("class", "trend-line")
             .attr("fill", "none")
-            .attr("stroke", (d, i) => d3.schemeCategory10[i % 10])
+            .attr("stroke", d => colorMap[d])
+            .each(d => console.log(colorMap[d]))
             .attr("stroke-width", 4)
             .attr("d", d => vis.line(vis.displayData[d]))
             .attr("stroke-dasharray", function() {
@@ -138,7 +146,7 @@ class SearchesOverTimeChart {
 
             enteringLines
                 .transition()
-                .duration(1500)
+                .duration(1250)
                 .ease(d3.easeLinear)
                 .attr("stroke-dashoffset", 0)
                 .on("end", () => {
