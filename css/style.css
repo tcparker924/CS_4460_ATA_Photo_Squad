@@ -3,6 +3,39 @@ body {
   font-family: 'Lato', sans-serif;
 }
 
+.title-page {
+    position: relative;
+    width: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+.background-gif {
+    width: 100%;
+    display: block;
+}
+
+.title-banner {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background-color: white;
+    text-align: center;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-font {
+    font-weight: bolder;
+    font-size: 50px;
+    color: black;
+    margin: 0;
+}
+
 h1 {
   margin-top: 40px;
   font-weight: normal;
@@ -92,23 +125,38 @@ h6 {
   display: none;
 }
 
-.container{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.title-page {
+    height: 100vh;
+    width: 100vw;
 }
 
-.searches-over-time-container {
-    width: 80vw;
-    height: 60vh;
+.container{
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
 }
 
+.searches-over-time-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.searches-over-time-text {
+    display: flex;
+    width: 30%
+
+}
+
+.searches-over-time-graph {
+    width: 60%;
+    margin-left: 5%;
+    margin-bottom: 5%;
+}
+
 .searches-over-time-area {
-    width: 80vw;
+    width: 100%;
     height: 60vh;
 }
 

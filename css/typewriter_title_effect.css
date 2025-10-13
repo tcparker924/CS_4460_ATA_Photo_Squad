@@ -1,0 +1,42 @@
+
+
+/*
+---------------
+IMPORTANT NOTE: This was not created by our team. This code was taken off of the
+following website which provides a few cool ideas for CSS text effects.
+https://prismic.io/blog/css-text-animations
+---------------
+*/
+
+/* Cursor */
+.cursor{
+    position: relative;
+    width: 24em;
+    margin: 0 auto;
+    border-right: 2px solid black;
+    font-size: 50px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+@keyframes hideCursor {
+    to { border-right: none; }
+}
+
+.typewriter-animation {
+    animation:
+            typewriter 5s steps(50) 1s 1 normal both,
+            blinkingCursor 500ms steps(1) 1s 6 normal,
+            hideCursor 0.1s linear 3.8s 1 forwards;
+}
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+@keyframes blinkingCursor{
+    from { border-right-color: black; }
+    to { border-right-color: transparent; }
+}
