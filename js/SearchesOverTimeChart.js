@@ -123,7 +123,7 @@ class SearchesOverTimeChart {
             .attr("class", "trend-line")
             .attr("fill", "none")
             .attr("stroke", (d, i) => d3.schemeCategory10[i % 10])
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 4)
             .attr("d", d => vis.line(vis.displayData[d]))
             .attr("stroke-dasharray", function() {
                 const length = this.getTotalLength();
