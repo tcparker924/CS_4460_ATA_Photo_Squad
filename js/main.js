@@ -1,6 +1,3 @@
-let searchTrendsDataPath = "data/search-trends-ai-image-generator.csv";
-
-
 loadSearchTrendsData();
 
 let searchesOverTimeChart;

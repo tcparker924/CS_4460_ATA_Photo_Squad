@@ -67,6 +67,14 @@ class SearchesOverTimeChart {
         vis.xAxis = d3.axisBottom(vis.x).ticks(d3.timeYear.every(1));
         vis.yAxis = d3.axisLeft(vis.y);
 
+        vis.svg.append("text")
+            .attr("class", "y-axis-label")
+            .attr("text-anchor", "middle")
+            .attr("transform", `rotate(-90)`)
+            .attr("x", -vis.height / 2)
+            .attr("y", -vis.margin.left + 15)
+            .text("Search Interest (%)");
+
         vis.svg.append("g")
             .attr("class", "x-axis")
             .attr("transform", `translate(0, ${vis.height})`);
