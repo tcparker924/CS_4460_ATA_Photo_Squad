@@ -1,6 +1,8 @@
 loadSearchTrendsData();
+loadGenerationRateOverTimeData();
 
 let searchesOverTimeChart;
+let generationRateOverTimeChart;
 
 function loadSearchTrendsData() {
     d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
@@ -21,6 +23,14 @@ function loadSearchTrendsData() {
             });
         });
 });
+}
+
+function loadGenerationRateOverTimeData() {
+    d3.csv("data/ai-image-totals-per-year.csv").then(csvData => {
+        console.log('Data loaded', csvData);
+
+        generationRateOverTimeChart = new GenerationRateOverTimeChart("generation-rate-over-time-area", prepareGenerationRateOverTimeData(csvData));
+    });
 
 }
 
@@ -30,6 +40,17 @@ function prepareSearchTrendData(data) {
         return {
             date: parseTime(d.Month),
             value: parseLessThanValues(d.Value)
+        };
+    });
+}
+
+function prepareGenerationRateOverTimeData(data) {
+    console.log(data);
+    const parseTime = d3.utcParse("%Y");
+    return data.map(d => {
+        return {
+            date: parseTime(d.Year),
+            value: (d.Value)
         };
     });
 }

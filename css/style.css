@@ -152,7 +152,9 @@ h6 {
 
 .searches-over-time-text {
     display: flex;
-    width: 30%
+    width: 30%;
+    align-items: center;
+    justify-content: center;
 
 }
 
@@ -178,5 +180,70 @@ h6 {
 /*
 --------
 END SEARCHES OVER TIME CSS SECTION
+--------
+*/
+
+
+/*
+--------
+BEGIN GENERATION RATE OVER TIME CSS SECTION
+--------
+*/
+
+.generation-rate-over-time-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.generation-rate-over-time-area {
+    width: 100%;
+    height: 60vh;
+}
+
+.generation-rate-over-time-text-area {
+    width: 100%;
+    height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.generation-rate-over-time-text {
+    display: flex;
+    width: 30%
+
+}
+
+.generation-rate-over-time-graph {
+    width: 400%;
+    margin-left: 5%;
+    margin-bottom: 5%;
+}
+
+.graph-and-legend-holder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.generation-rate-over-time-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ .vertical-slider {
+     writing-mode: bt-lr; /* bottom to top, left to right */
+     -webkit-appearance: slider-vertical;
+     width: 8px;
+     height: 200px;
+ }
+/*
+--------
+END GENERATION RATE OVER TIME CSS SECTION
 --------
 */
