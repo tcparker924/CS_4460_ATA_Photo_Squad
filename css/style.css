@@ -247,3 +247,35 @@ BEGIN GENERATION RATE OVER TIME CSS SECTION
 END GENERATION RATE OVER TIME CSS SECTION
 --------
 */
+
+
+/*
+--------
+BEGIN DATA CENTER MAP CSS SECTION
+--------
+*/
+.data-center-map-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.data-center-map-graph {
+    width: 100%;
+    margin-left: 5%;
+    margin-bottom: 5%;
+}
+
+.data-center-map-area {
+    width: 80vw;
+    height: 70vh;
+}
+
+/*
+--------
+END POWER PLANT MAP CSS SECTION
+--------
+*/

@@ -83,7 +83,9 @@ class GenerationRateOverTimeChart {
         const chunkValue = 100000000;
         const circleCount = Math.ceil(temp_val / chunkValue);
 
+
         console.log(circleCount);
+        console.log(vis.data);
 
         for (let i = 0; i < circleCount; i++) {
             vis.displayData.push({

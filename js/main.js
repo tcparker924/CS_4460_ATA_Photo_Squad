@@ -1,8 +1,10 @@
 loadSearchTrendsData();
 loadGenerationRateOverTimeData();
+loadUSDataCenterData();
 
 let searchesOverTimeChart;
 let generationRateOverTimeChart;
+let dataCenterMapChart;
 
 function loadSearchTrendsData() {
     d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
@@ -34,6 +36,15 @@ function loadGenerationRateOverTimeData() {
 
 }
 
+function loadUSDataCenterData() {
+    Promise.all([
+        d3.csv("data/im3_open_source_data_center_atlas.csv"),
+        d3.json("data/counties-10m.json")
+    ]).then(([csvData, worldData]) => {
+        dataCenterMapChart = new DataCenterMapChart("data-center-map-area", prepareDataCenterMapChart(csvData), worldData);
+    });
+}
+
 function prepareSearchTrendData(data) {
     const parseTime = d3.utcParse("%Y-%m");
     return data.map(d => {
@@ -53,6 +64,19 @@ function prepareGenerationRateOverTimeData(data) {
             value: (d.Value)
         };
     });
+}
+
+function prepareDataCenterMapChart(data) {
+    return data.map(d => ({
+        state: d.state,
+        county: d.county,
+        operator: d.operator,
+        name: d.name,
+        longitude: +d.lon,
+        latitude: +d.lat,
+        sqft: +d.sqft,
+        type: d.type
+    }));
 }
 
 
