@@ -279,3 +279,51 @@ BEGIN DATA CENTER MAP CSS SECTION
 END POWER PLANT MAP CSS SECTION
 --------
 */
+
+
+/*
+--------
+BEGIN DATA ELECTRICITY COMPARISON CHART CSS SECTION
+--------
+*/
+
+.electricity-comparison-chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.electricity-comparison-chart-graph {
+    width: 100%;
+    margin-left: 5%;
+    margin-bottom: 5%;
+    display: flex;
+
+}
+
+.electricity-comparison-chart-area {
+    width: 50vw;
+    height: 70vh;
+}
+
+.electricity-comparison-chart-dashboard-area {
+    width: 10vw;
+    height: 70vh;
+}
+
+.vertical-toggle-switches {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+
+/*
+--------
+END DATA ELECTRICITY COMPARISON CHART CSS SECTION
+--------
+*/
