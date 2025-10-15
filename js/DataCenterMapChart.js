@@ -52,6 +52,15 @@ class DataCenterMapChart {
             .domain(vis.operators)
             .range(vis.operators.map((_, i) => d3.interpolateRainbow(i / vis.operators.length)));
         
+        //Legend
+        vis.svg_legend = d3.select("#data-center-map-legend").append("svg")
+            .attr("width", vis.width + vis.margin.left + vis.margin.right)
+            .attr("height", vis.margin.top)
+            .append("g")
+            .attr("transform", `translate(${50}, ${0})`);
+
+        
+        
         vis.wrangleData();
     }
 

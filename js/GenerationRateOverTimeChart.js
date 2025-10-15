@@ -54,7 +54,7 @@ class GenerationRateOverTimeChart {
             .attr("width", vis.width + vis.margin.left + vis.margin.right)
             .attr("height", vis.margin.top)
             .append("g")
-            .attr("transform", `translate(${0}, ${0})`);
+            .attr("transform", `translate(${50}, ${0})`);
 
         vis.legendGroup = vis.svg_legend.append("g")
             .attr("class", "legend-group")
