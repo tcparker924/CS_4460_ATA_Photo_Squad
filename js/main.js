@@ -1,10 +1,12 @@
 loadSearchTrendsData();
 loadGenerationRateOverTimeData();
 loadUSDataCenterData();
+loadElectricityComparisonChartData();
 
 let searchesOverTimeChart;
 let generationRateOverTimeChart;
 let dataCenterMapChart;
+let electricityComparisonChart;
 
 function loadSearchTrendsData() {
     d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
@@ -45,6 +47,13 @@ function loadUSDataCenterData() {
     });
 }
 
+function loadElectricityComparisonChartData() {
+    d3.csv("data/CS 4460 Cleaned Data - AI Image Generation Energy Consumption.csv").then(csvData => {
+        console.log('Data loaded', csvData);
+        electricityComparisonChart = new ElectricityComparisonChart("electricity-comparison-chart-area", prepareElectricityComparisonChartData(csvData));
+    });
+}
+
 function prepareSearchTrendData(data) {
     const parseTime = d3.utcParse("%Y-%m");
     return data.map(d => {
@@ -76,6 +85,13 @@ function prepareDataCenterMapChart(data) {
         latitude: +d.lat,
         sqft: +d.sqft,
         type: d.type
+    }));
+}
+
+function prepareElectricityComparisonChartData(data) {
+    return data.map(d => ({
+        category: d["Energy Consumer"],
+        electricity: +d["Energy Consumed (kWh)"],
     }));
 }
 
