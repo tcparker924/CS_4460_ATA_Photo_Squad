@@ -7,8 +7,11 @@ class ElectricityComparisonChart {
         this.imagesGenerated = 1000;
         this.data = data;
         this.displayData = data;
-        this.ballRadius = 10;
+        this.ballRadius = 15;
         this.balls = [];
+        this.displayPowerConsumptionMap = {};
+        this.spawnToken = 0; // This cancnels the queue of balls when we swap toggles
+
         this.initVis();
     }
 
@@ -22,23 +25,19 @@ class ElectricityComparisonChart {
                 switch (selected) {
                     case "1000_image_toggle":
                         vis.imagesGenerated = 1000;
-                        vis.ballRadius = 10;
+                        vis.ballRadius = 15;
                         break;
                     case "100000_image_toggle":
                         vis.imagesGenerated = 100000;
-                        vis.ballRadius = 3;
+                        vis.ballRadius = 8;
                         break;
                     case "34000000_image_toggle":
                         vis.imagesGenerated = 34000000;
-                        vis.ballRadius = 1;
-                        break;
-                    case "100000000_image_toggle":
-                        vis.imagesGenerated = 100000000;
-                        vis.ballRadius = 0.5;
+                        vis.ballRadius = 6;
                         break;
                     case "12000000000_image_toggle":
                         vis.imagesGenerated = 12000000000;
-                        vis.ballRadius = 0.1
+                        vis.ballRadius = 3
                         break;
                 }
             }
@@ -62,6 +61,7 @@ class ElectricityComparisonChart {
             Bodies = Matter.Bodies;
 
         vis.engine = Engine.create();
+        vis.engine.enableSleeping = true;
         vis.world = vis.engine.world;
 
         vis.render = Render.create({
@@ -72,7 +72,8 @@ class ElectricityComparisonChart {
                 height: vis.height,
                 showAngleIndicator: false,
                 wireframes: false,
-                background: "#ffffff"
+                background: "#ffffff",
+                showSleeping: false
             }
         });
 
@@ -88,9 +89,9 @@ class ElectricityComparisonChart {
 
         for (let i = 0; i < 4; i++) {
             const x = cupStartX + i * cupSpacing;
-            Composite.add(vis.world, Bodies.rectangle(x, cupY, cupWidth, 10, { isStatic: true }));
-            Composite.add(vis.world, Bodies.rectangle(x - cupWidth / 2, cupY - cupHeight / 2, 10, cupHeight, { isStatic: true }));
-            Composite.add(vis.world, Bodies.rectangle(x + cupWidth / 2, cupY - cupHeight / 2, 10, cupHeight, { isStatic: true }));
+            Composite.add(vis.world, Bodies.rectangle(x, cupY, cupWidth, 30, { isStatic: true }));
+            Composite.add(vis.world, Bodies.rectangle(x - cupWidth / 2, cupY - cupHeight / 2, 20, cupHeight, { isStatic: true }));
+            Composite.add(vis.world, Bodies.rectangle(x + cupWidth / 2, cupY - cupHeight / 2, 20, cupHeight, { isStatic: true }));
         }
 
         vis.cupWidth = cupWidth;
@@ -109,18 +110,47 @@ class ElectricityComparisonChart {
         vis.powerConsumptionMap = {
             images: vis.powerConsumedByImageGeneration,
             light: Math.round(vis.powerConsumedByImageGeneration / vis.data[1].electricity),
-            phone: Math.round(vis.powerConsumedByImageGeneration / vis.data[2].electricity / 10),
+            phone: Math.round(vis.powerConsumedByImageGeneration / vis.data[2].electricity),
             tv: Math.round(vis.powerConsumedByImageGeneration / vis.data[3].electricity),
             fridge: Math.round(vis.powerConsumedByImageGeneration / vis.data[4].electricity)
         };
+        vis.displayPowerConsumptionMap = vis.powerConsumptionMap;
+        switch(vis.imagesGenerated) {
+            case 1000:
+                vis.displayPowerConsumptionMap.light = vis.powerConsumptionMap.light
+                vis.displayPowerConsumptionMap.phone = vis.powerConsumptionMap.phone / 10
+                vis.displayPowerConsumptionMap.tv = vis.powerConsumptionMap.tv
+                vis.displayPowerConsumptionMap.fridge = vis.powerConsumptionMap.fridge
+                break;
+            case 100000:
+                vis.displayPowerConsumptionMap.light = vis.powerConsumptionMap.light / 7
+                vis.displayPowerConsumptionMap.phone = vis.powerConsumptionMap.phone / 100
+                vis.displayPowerConsumptionMap.tv = vis.powerConsumptionMap.tv / 7
+                vis.displayPowerConsumptionMap.fridge = vis.powerConsumptionMap.fridge / 7
+                break;
+            case 34000000:
+                vis.displayPowerConsumptionMap.light = vis.powerConsumptionMap.light / 365
+                vis.displayPowerConsumptionMap.phone = vis.powerConsumptionMap.phone / 10000
+                vis.displayPowerConsumptionMap.tv = vis.powerConsumptionMap.tv / 365
+                vis.displayPowerConsumptionMap.fridge = vis.powerConsumptionMap.fridge / 365
+                break;
+            case 12000000000:
+                vis.displayPowerConsumptionMap.light = vis.powerConsumptionMap.light / (365 * 100)
+                vis.displayPowerConsumptionMap.phone = vis.powerConsumptionMap.phone / 1000000
+                vis.displayPowerConsumptionMap.tv = vis.powerConsumptionMap.tv / (365 * 100)
+                vis.displayPowerConsumptionMap.fridge = vis.powerConsumptionMap.fridge / (365 * 100)
+                break;
+        }
 
         vis.updateVis();
     }
 
-    updateVis() {
+    async updateVis() {
         let vis = this;
         const Composite = Matter.Composite;
         const Bodies = Matter.Bodies;
+
+        const currentSpawnToken = ++vis.spawnToken;
 
         if (vis.balls.length > 0) {
             for (let ball of vis.balls) {
@@ -130,31 +160,44 @@ class ElectricityComparisonChart {
         }
 
         const colors = vis.circleColors;
+        const promises = [];
+
         let cupIndex = 0;
 
-        for (const [key, value] of Object.entries(vis.powerConsumptionMap)) {
+        for (const [key, value] of Object.entries(vis.displayPowerConsumptionMap)) {
             if (key === 'images') continue;
 
-            const dropX = vis.cupStartX + cupIndex * vis.cupSpacing + (Math.random() * 10 - 5);
+            const currentCupIndex = cupIndex;
+            const dropX = vis.cupStartX + currentCupIndex * vis.cupSpacing;
 
-            for (let i = 0; i < value; i++) {
-                const dropY = 50 + Math.random() * 10;
+            const spawnBalls = async () => {
+                for (let i = 0; i < value; i++) {
+                    if (currentSpawnToken !== vis.spawnToken) {
+                        return;
+                    }
 
-                const ball = Bodies.circle(dropX, dropY, vis.ballRadius, {
-                    restitution: 0.5,
-                    friction: 0.0001,
-                    density: 0.001,
-                    render: { fillStyle: colors[cupIndex % colors.length] }
-                });
+                    const dropY = 30 + Math.random() * 10;
 
-                vis.balls.push(ball);
-            }
+                    const ball = Bodies.circle(dropX + (Math.random() * 50 - 5), dropY, vis.ballRadius, {
+                        restitution: 0.0,
+                        friction: 0,
+                        density: 0.05,
+                        frictionAir: 0.001,
+                        render: { fillStyle: colors[currentCupIndex % colors.length] },
+                    });
 
+                    vis.balls.push(ball);
+                    Composite.add(vis.world, ball);
+
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+            };
+
+            promises.push(spawnBalls());
             cupIndex++;
         }
 
-        Composite.add(vis.world, vis.balls);
-
-        Matter.Render.lookAt(vis.render, Composite.allBodies(vis.world));
+        await Promise.all(promises);
     }
+
 }

@@ -306,12 +306,12 @@ BEGIN DATA ELECTRICITY COMPARISON CHART CSS SECTION
 
 .electricity-comparison-chart-area {
     width: 50vw;
-    height: 70vh;
+    height: 90vh;
 }
 
 .electricity-comparison-chart-dashboard-area {
     width: 10vw;
-    height: 70vh;
+    height: 90vh;
 }
 
 .vertical-toggle-switches {
