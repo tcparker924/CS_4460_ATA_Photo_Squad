@@ -46,6 +46,12 @@ class DataCenterMapChart {
             .attr("fill", "#eee")
             .attr("stroke", "#aaa");
 
+        //Color Coding for operators
+        vis.operators = [...new Set(vis.data.map(d => d.operator))];
+        vis.colorScale = d3.scaleOrdinal()
+            .domain(vis.operators)
+            .range(vis.operators.map((_, i) => d3.interpolateRainbow(i / vis.operators.length)));
+        
         vis.wrangleData();
     }
 
@@ -66,7 +72,6 @@ class DataCenterMapChart {
             .range([1, 20]);
 
 
-        // TODO: Change the circle color based on company
         // TODO: Add tooltips for each circle
         // TODO: Add Legend for size (?)
         // TODO: Add Filters for data centers of certain size / company
@@ -84,7 +89,7 @@ class DataCenterMapChart {
                 return coords ? coords[1] : null;
             })
             .attr("r", d => vis.radiusScale(d.sqft))
-            .attr("fill", "#d73027")
+            .attr("fill", d => vis.colorScale(d.operator))
             .attr("opacity", 0.75)
     }
 }
