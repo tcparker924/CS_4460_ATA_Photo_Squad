@@ -58,7 +58,7 @@ class DataCenterMapChart {
             .attr("height", vis.margin.top)
             .append("g")
             .attr("transform", `translate(${50}, ${0})`);
-
+ 
         
         
         vis.wrangleData();
