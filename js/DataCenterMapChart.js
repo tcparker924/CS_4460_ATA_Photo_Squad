@@ -51,7 +51,7 @@ class DataCenterMapChart {
         );
                 
         vis.operatorCounts = d3.rollup(vis.filteredData, v => v.length, d => d.operator);
-
+        
         vis.topOperators = Array.from(vis.operatorCounts.entries())
             .sort((a, b) => d3.descending(a[1], b[1]))
             .slice(0, 5)
@@ -67,6 +67,9 @@ class DataCenterMapChart {
             .range(d3.schemeTableau10.slice(0, 6))
         
         //Legend
+
+        vis.visibleOperators = new Set(vis.operators); 
+
         vis.svg_legend = d3.select("#data-center-map-legend").append("svg")
             .attr("width", vis.width + vis.margin.left + vis.margin.right)
             .attr("height", vis.margin.top + 40)
@@ -118,7 +121,7 @@ class DataCenterMapChart {
 
         vis.colorLegend = vis.svg.append("g")
             .attr("class", "color-legend")
-            .attr("transform", `translate(${50}, ${50})`); // adjust position as needed
+            .attr("transform", `translate(${50}, ${50})`);
 
 
         vis.legendItem = vis.colorLegend.selectAll(".legend-item")
@@ -126,8 +129,20 @@ class DataCenterMapChart {
             .enter()
             .append("g")
             .attr("class", "legend-item")
-            .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+            .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+            .style("cursor", "pointer")
+            .on("click", function(event, operator) {
+                if (vis.visibleOperators.has(operator)) {
+                    vis.visibleOperators.delete(operator);
+                } else {
+                    vis.visibleOperators.add(operator);
+                }
+                vis.legendItem.select("circle")
+                    .attr("opacity", d => vis.visibleOperators.has(d) ? 1 : 0.3);
 
+                vis.legendItem.select("text")
+                    .style("opacity", d => vis.visibleOperators.has(d) ? 1 : 0.5);
+            });
 
         vis.legendItem.append("circle")
             .attr("r", 6)
@@ -141,8 +156,8 @@ class DataCenterMapChart {
             .style("font-size", "12px")
             .style("fill", "#333");
                 vis.wrangleData();
-            }
-
+        }
+        
     wrangleData() {
         let vis = this;
 
@@ -159,7 +174,32 @@ class DataCenterMapChart {
             .domain(sqftExtent)
             .range([1, 20]);
 
+        const filtered = vis.displayData.filter(d =>
+            vis.visibleOperators.has(d.operator_grouped)
+        );
 
+        const circles = vis.g.selectAll(".plant-circle")
+        .data(filtered, d => d.name);
+            circles.exit()
+        .transition().duration(300)
+        .attr("r", 0)
+        .remove();
+
+    circles.enter().append("circle")
+        .attr("class", "plant-circle")
+        .attr("cx", d => {
+            const coords = vis.projection([d.longitude, d.latitude]);
+            return coords ? coords[0] : null;
+        })
+        .attr("cy", d => {
+            const coords = vis.projection([d.longitude, d.latitude]);
+            return coords ? coords[1] : null;
+        })
+        .attr("r", 0)
+        .attr("fill", d => vis.colorScale(d.operator_grouped))
+        .attr("opacity", 0.75)
+        .transition().duration(300)
+        .attr("r", d => vis.radiusScale(d.sqft));
         // TODO: Add tooltips for each circle
         // TODO: Add Filters for data centers of certain size / company
         vis.g.selectAll(".plant-circle")
@@ -178,5 +218,34 @@ class DataCenterMapChart {
             .attr("r", d => vis.radiusScale(d.sqft))
             .attr("fill", d => vis.colorScale(d.operator_grouped))
             .attr("opacity", 0.75)
+            .on('mouseover', function(event, d){
+                d3.select(this)
+                    .attr('stroke-width', '2px')
+                    .attr('stroke', 'black')
+                    .attr('fill', 'rgba(173,222,255,0.62)')
+                vis.tooltip
+                    .style("opacity", 1)
+                    .style("left", event.pageX + 20 + "px")
+                    .style("top", event.pageY + "px")
+                    .html(`
+                        <div style="border: thin solid grey; border-radius: 5px; background: lightgrey; padding: 20px">
+                            <h4>Name: ${d.name}<h4>
+                            <p> State: ${d.state}</p>      
+                            <p> County: ${d.county}</p>  
+                            <p> SQFT: ${d.sqft}</p>      
+                            <p> Type: ${d.type}</p>                     
+                        </div>`);
+            })
+            .on('mouseout', function(event, d){
+                d3.select(this)
+                    .attr('stroke-width', '0px')
+                    .attr("fill", vis.colorScale(d.operator_grouped));
+
+                vis.tooltip
+                    .style("opacity", 0)
+                    .style("left", 0)
+                    .style("top", 0)
+                    .html(``);
+            });
     }
 }
