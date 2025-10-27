@@ -45,6 +45,17 @@ class ElectricityComparisonChart {
             vis.wrangleData()
         });
 
+        vis.legend_width = document.getElementById("electricity-legend-area").getBoundingClientRect().width;
+        vis.legend_height = document.getElementById("electricity-legend-area").getBoundingClientRect().height;
+
+        vis.legend_svg = d3.select("#electricity-legend-area")
+            .append("svg")
+            .attr("width", vis.legend_width)
+            .attr("height", vis.legend_height)
+            .append("g")
+            .attr("transform", `translate(${vis.ballRadius}, ${vis.ballRadius})`);
+
+
         // The following code is a mix of code from the examples listed
         // here: https://github.com/liabru/matter-js/blob/master/examples/avalanche.js
         // with adaptations to fit what we want it to do
@@ -100,6 +111,12 @@ class ElectricityComparisonChart {
         vis.cupSpacing = cupSpacing;
         vis.cupStartX = cupStartX;
 
+        vis.cupLabelSvg = d3.select(`#${vis.parentElement}`)
+            .append("svg")
+            .attr("width", vis.width)
+            .attr("height", 50)
+            .attr("transform", (d, i) => `translate(0, ${-20})`);
+
         vis.wrangleData();
     }
 
@@ -147,6 +164,92 @@ class ElectricityComparisonChart {
 
     async updateVis() {
         let vis = this;
+
+        let legendLabels = []
+        let cupLabels = [`${Math.round(vis.displayPowerConsumptionMap.light)} light bulbs`,
+            `${Math.round(vis.displayPowerConsumptionMap.phone)} phones`,
+            `${Math.round(vis.displayPowerConsumptionMap.tv)} TVs`,
+            `${Math.round(vis.displayPowerConsumptionMap.fridge)} refrigerators`
+        ];
+
+        switch(vis.imagesGenerated) {
+            case 100000:
+                legendLabels = ["Energy to burn a lightbulb for 1 week",
+                    "Energy to charge 100 iPhones to full",
+                    "Energy to run a TV for 1 week", "Energy to run a Fridge for 1 week"];
+                break;
+            case 34000000:
+                legendLabels = ["Energy to burn a lightbulb for 1 year",
+                    "Energy to charge 10,000 iPhones to full",
+                    "Energy to run a TV for 1 year", "Energy to run a Fridge for 1 year"];
+                break;
+            case 12000000000:
+                legendLabels = ["Energy to burn a lightbulb for 100 years",
+                    "Energy to charge 1,000,000 iPhones to full",
+                    "Energy to run a TV for 100 years", "Energy to run a Fridge for 100 years"];
+                break;
+            default:
+                legendLabels = ["Energy to burn a lightbulb for 1 day",
+                    "Energy to charge 10 iPhones to full",
+                    "Energy to run a TV for 1 day", "Energy to run a Fridge for 1 day"];
+                break;
+        }
+
+        let legend = vis.legend_svg.selectAll(".legend-item")
+            .data(legendLabels);
+
+        legend.exit().remove();
+
+        let legendEnter = legend.enter()
+            .append("g")
+            .attr("class", "legend-item")
+            .attr("transform", (d, i) => `translate(0, ${i * 60})`);
+
+        legendEnter.append("circle")
+            .attr("r", vis.ballRadius)
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .style("fill", (d, i) => vis.circleColors[i]);
+
+        legendEnter.append("text")
+            .attr("x", 2 * vis.ballRadius)
+            .attr("y", 4)
+            .style("font-size", "14px")
+            .text(d => ("=" + d));
+
+        let legendMerge = legendEnter.merge(legend);
+        legendMerge.select("circle")
+            .transition()
+            .duration(500)
+            .attr("r", vis.ballRadius)
+            .style("fill", (d, i) => vis.circleColors[i]);
+
+        legendMerge.select("text")
+            .transition()
+            .duration(500)
+            .attr("x", 2 * vis.ballRadius)
+            .text(d => ("= " + d));
+
+        let cupLabelsSvg =  vis.cupLabelSvg.selectAll("text")
+            .data(cupLabels)
+
+        cupLabelsSvg.exit().remove();
+
+        cupLabelsSvg.enter()
+            .append("text")
+            .attr("x", (d, i) => vis.cupStartX + i * vis.cupSpacing)
+            .attr("y", 20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .attr("fill", (d, i) => vis.circleColors[i])
+            .text(d => d)
+            .merge(cupLabelsSvg)
+            .transition()
+            .duration(500)
+            .text(d => d)
+            .attr("x", (d, i) => vis.cupStartX + i * vis.cupSpacing)
+            .attr("fill", (d, i) => vis.circleColors[i]);
+
         const Composite = Matter.Composite;
         const Bodies = Matter.Bodies;
 
@@ -198,6 +301,7 @@ class ElectricityComparisonChart {
         }
 
         await Promise.all(promises);
+
     }
 
 }

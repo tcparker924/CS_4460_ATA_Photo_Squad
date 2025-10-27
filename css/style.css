@@ -237,7 +237,7 @@ BEGIN GENERATION RATE OVER TIME CSS SECTION
 }
 
  .vertical-slider {
-     writing-mode: bt-lr; /* bottom to top, left to right */
+     writing-mode: bt-lr;
      -webkit-appearance: slider-vertical;
      width: 8px;
      height: 200px;
@@ -312,15 +312,24 @@ BEGIN DATA ELECTRICITY COMPARISON CHART CSS SECTION
 }
 
 .electricity-comparison-chart-dashboard-area {
-    width: 10vw;
+    width: 40vw;
     height: 90vh;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.electricity-legend-area {
+    width: 100%;
+    height: 40vh;
 }
 
 .vertical-toggle-switches {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 10px;
+    margin-bottom: 5%;
 }
 
 
