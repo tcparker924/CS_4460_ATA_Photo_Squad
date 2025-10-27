@@ -8,6 +8,7 @@ class GenerationRateOverTimeChart {
         this.dataIndex = 0;
         this.currentDate = data[2].date
         this.currentValue = data[2].value
+        this.currentGoogleImagesAmount = 136000000000
 
         this.initVis();
     }
@@ -71,6 +72,21 @@ class GenerationRateOverTimeChart {
             .style("font-size", "14px")
             .style("fill", "#333");
 
+        vis.googleSvgWidth = document.getElementById("generation-rate-over-time-google-comparison-area").getBoundingClientRect().width;
+        vis.googleSvgHidth = document.getElementById("generation-rate-over-time-google-comparison-area").getBoundingClientRect().height;
+
+        vis.googleSvg = d3.select("#generation-rate-over-time-google-comparison-area").append("svg")
+            .attr("width", vis.googleSvgWidth)
+            .attr("height", vis.googleSvgHidth)
+            .append("g")
+
+        vis.googleSvg.selectAll("image")
+            .data(vis.displayData)
+            .join("image")
+            .attr("xlink:href", "resources/google-logo.png")
+            .attr("width", d => vis.googleSvgHidth * 0.8)
+            .attr("height", d => vis.googleSvgHidth)
+
         vis.wrangleData();
     }
 
@@ -122,6 +138,41 @@ class GenerationRateOverTimeChart {
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
             .attr("fill", d => d.color);
+
+        let rectangleHeightProp = vis.currentValue / vis.currentGoogleImagesAmount
+
+        vis.googleSvg.selectAll("rect")
+            .data([vis.currentValue])
+            .join("rect")
+            .attr("width", d => vis.googleSvgHidth * 0.8)
+            .attr("height", d => (vis.googleSvgHidth * 0.8) * (1 - rectangleHeightProp))
+            .attr("fill", "white")
+            .attr("transform", `translate(${0}, ${50})`);
+
+        vis.googleSvg.selectAll("text.value-label")
+            .data([vis.currentValue])
+            .join("text")
+            .attr("class", "value-label")
+            .attr("x", vis.googleSvgHidth * 0.8 / 2)
+            .attr("y", d => (vis.googleSvgHidth * 0.8) * (1 - rectangleHeightProp) - 45)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .html("")
+            .selectAll("tspan")
+            .data([
+                `In ${vis.currentDate.getFullYear() + 1} the estimated total`,
+                `amount of AI images generated`,
+                `${vis.currentDate.getFullYear() + 1 > 2025 ? "will be " : vis.currentDate.getFullYear() + 1 == 2025 ? "is" : "was" } ${Math.round(rectangleHeightProp * 100) > 0 ? Math.round(rectangleHeightProp * 100) : "<1"}% of the amount `,
+                `of total images on Google Images`
+            ])
+            .join("tspan")
+            .attr("x", vis.googleSvgHidth * 0.8 / 2)
+            .attr("dy", (d, i) => i === 0 ? 0 : "1.2em")
+            .text(d => d);
+
+
+
+
 
 
     }
