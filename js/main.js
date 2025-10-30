@@ -2,11 +2,13 @@ loadSearchTrendsData();
 loadGenerationRateOverTimeData();
 loadUSDataCenterData();
 loadElectricityComparisonChartData();
+loadAccuracyOverTimeData()
 
 let searchesOverTimeChart;
 let generationRateOverTimeChart;
 let dataCenterMapChart;
 let electricityComparisonChart;
+let accuracyConfidenceChart;
 
 function loadSearchTrendsData() {
     d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
@@ -54,6 +56,15 @@ function loadElectricityComparisonChartData() {
     });
 }
 
+function loadAccuracyOverTimeData() {
+    d3.csv("data/ai-image-totals-per-year.csv").then(csvData => {
+        console.log('Data loaded', csvData);
+
+        accuracyConfidenceChart = new AccuracyConfidenceChart("accuracy-versus-confidence-area", prepareAccuracyConfidenceChartData(csvData));
+    });
+
+}
+
 function prepareSearchTrendData(data) {
     const parseTime = d3.utcParse("%Y-%m");
     return data.map(d => {
@@ -93,6 +104,10 @@ function prepareElectricityComparisonChartData(data) {
         category: d["Energy Consumer"],
         electricity: +d["Energy Consumed (kWh)"],
     }));
+}
+
+function prepareAccuracyConfidenceChartData(data) {
+    return data;
 }
 
 
