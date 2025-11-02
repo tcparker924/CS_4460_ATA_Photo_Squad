@@ -2,13 +2,13 @@ loadSearchTrendsData();
 loadGenerationRateOverTimeData();
 loadUSDataCenterData();
 loadElectricityComparisonChartData();
-loadAccuracyOverTimeData()
+loadAccuracyVersusAgeData()
 
 let searchesOverTimeChart;
 let generationRateOverTimeChart;
 let dataCenterMapChart;
 let electricityComparisonChart;
-let accuracyConfidenceChart;
+let accuracyAgeChart;
 
 function loadSearchTrendsData() {
     d3.csv("data/search-trends-ai-image-generator.csv").then(csvData1 => {
@@ -56,13 +56,12 @@ function loadElectricityComparisonChartData() {
     });
 }
 
-function loadAccuracyOverTimeData() {
-    d3.csv("data/ai-image-totals-per-year.csv").then(csvData => {
+function loadAccuracyVersusAgeData() {
+    d3.csv("data/accuracy-versus-age.csv").then(csvData => {
         console.log('Data loaded', csvData);
 
-        accuracyConfidenceChart = new AccuracyConfidenceChart("accuracy-versus-confidence-area", prepareAccuracyConfidenceChartData(csvData));
+        accuracyAgeChart = new AccuracyAgeChart("accuracy-versus-age-area", prepareAccuracyAgeChartData(csvData));
     });
-
 }
 
 function prepareSearchTrendData(data) {
@@ -106,8 +105,12 @@ function prepareElectricityComparisonChartData(data) {
     }));
 }
 
-function prepareAccuracyConfidenceChartData(data) {
-    return data;
+function prepareAccuracyAgeChartData(data) {
+    return data.map(d => ({
+        age: d.age,
+        ai: d.ai,
+        real: d.real
+    }));
 }
 
 

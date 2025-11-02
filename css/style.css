@@ -370,17 +370,17 @@ END DATA ELECTRICITY COMPARISON CHART CSS SECTION
 
 /*
 --------
-BEGIN ACCURACY VS CONFIDENCE CSS SECTION
+BEGIN ACCURACY VS AGE CSS SECTION
 --------
 */
 
-.accuracy-verus-confidence-container {
+.accuracy-verus-age-container {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.accuracy-versus-confidence-text {
+.accuracy-versus-age-text {
     display: flex;
     width: 50%;
     align-items: center;
