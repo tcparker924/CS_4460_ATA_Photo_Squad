@@ -73,7 +73,7 @@ h6 {
     font-weight: 100;
     font-size: 20px;
     margin-bottom: 30px;
-    color: lightgray;
+    color: rgb(132, 132, 132);
 }
 
 /*************/
@@ -388,6 +388,14 @@ BEGIN ACCURACY VS AGE CSS SECTION
 
 }
 
+
+.shaft {
+    stroke-linecap: round;
+}
+.head, .tail {
+    stroke: black;
+    stroke-width: 0.5;
+}
 /*
 --------
 END ACCURACY VS CONFIDENCE CSS SECTION

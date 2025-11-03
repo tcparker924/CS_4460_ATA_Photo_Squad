@@ -107,7 +107,7 @@ function prepareElectricityComparisonChartData(data) {
 
 function prepareAccuracyAgeChartData(data) {
     return data.map(d => ({
-        age: d.age,
+        age_group: d.age_group,
         ai: d.ai,
         real: d.real
     }));

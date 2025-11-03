@@ -142,6 +142,7 @@ class DataCenterMapChart {
 
                 vis.legendItem.select("text")
                     .style("opacity", d => vis.visibleOperators.has(d) ? 1 : 0.5);
+                vis.updateVis();
             });
 
         vis.legendItem.append("circle")
@@ -174,66 +175,53 @@ class DataCenterMapChart {
             .domain(sqftExtent)
             .range([1, 20]);
 
+        // ✅ Filter only visible operators
         const filtered = vis.displayData.filter(d =>
             vis.visibleOperators.has(d.operator_grouped)
         );
 
+        // DATA JOIN
         const circles = vis.g.selectAll(".plant-circle")
-        .data(filtered, d => d.name);
-            circles.exit()
-        .transition().duration(300)
-        .attr("r", 0)
-        .remove();
+            .data(filtered, d => d.name);
 
-    circles.enter().append("circle")
-        .attr("class", "plant-circle")
-        .attr("cx", d => {
-            const coords = vis.projection([d.longitude, d.latitude]);
-            return coords ? coords[0] : null;
-        })
-        .attr("cy", d => {
-            const coords = vis.projection([d.longitude, d.latitude]);
-            return coords ? coords[1] : null;
-        })
-        .attr("r", 0)
-        .attr("fill", d => vis.colorScale(d.operator_grouped))
-        .attr("opacity", 0.75)
-        .transition().duration(300)
-        .attr("r", d => vis.radiusScale(d.sqft));
-        // TODO: Add tooltips for each circle
-        // TODO: Add Filters for data centers of certain size / company
-        vis.g.selectAll(".plant-circle")
-            .data(vis.displayData)
-            .enter()
+        // EXIT
+        circles.exit()
+            .transition().duration(300)
+            .attr("r", 0)
+            .remove();
+
+        // ENTER + UPDATE
+        const circlesEnter = circles.enter()
             .append("circle")
             .attr("class", "plant-circle")
             .attr("cx", d => {
-            const coords = vis.projection([d.longitude, d.latitude]);
-            return coords ? coords[0] : null;
-        })
+                const coords = vis.projection([d.longitude, d.latitude]);
+                return coords ? coords[0] : null;
+            })
             .attr("cy", d => {
                 const coords = vis.projection([d.longitude, d.latitude]);
                 return coords ? coords[1] : null;
             })
-            .attr("r", d => vis.radiusScale(d.sqft))
+            .attr("r", 0)
             .attr("fill", d => vis.colorScale(d.operator_grouped))
             .attr("opacity", 0.75)
             .on('mouseover', function(event, d){
                 d3.select(this)
                     .attr('stroke-width', '2px')
                     .attr('stroke', 'black')
-                    .attr('fill', 'rgba(173,222,255,0.62)')
+                    .attr('fill', 'rgba(173,222,255,0.62)');
+
                 vis.tooltip
                     .style("opacity", 1)
                     .style("left", event.pageX + 20 + "px")
                     .style("top", event.pageY + "px")
                     .html(`
                         <div style="border: thin solid grey; border-radius: 5px; background: lightgrey; padding: 20px">
-                            <h4>Name: ${d.name}<h4>
-                            <p> State: ${d.state}</p>      
-                            <p> County: ${d.county}</p>  
-                            <p> SQFT: ${d.sqft}</p>      
-                            <p> Type: ${d.type}</p>                     
+                            <h4>Name: ${d.name}</h4>
+                            <p>State: ${d.state}</p>      
+                            <p>County: ${d.county}</p>  
+                            <p>SQFT: ${d.sqft}</p>      
+                            <p>Type: ${d.type}</p>                     
                         </div>`);
             })
             .on('mouseout', function(event, d){
@@ -247,5 +235,10 @@ class DataCenterMapChart {
                     .style("top", 0)
                     .html(``);
             });
+
+        // ENTER + UPDATE MERGE
+        circlesEnter.merge(circles)
+            .transition().duration(300)
+            .attr("r", d => vis.radiusScale(d.sqft));
     }
 }
