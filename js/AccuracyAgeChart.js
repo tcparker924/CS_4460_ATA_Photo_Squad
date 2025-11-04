@@ -4,26 +4,47 @@ class AccuracyAgeChart {
         this.parentElement = parentElement;
         this.data = data;
         this.displayData = data;
+        this.ageIndex = 0;
+
         this.initVis();
     }
 
     initVis() {
         let vis = this;
 
-        // Margins and size
+        d3.selectAll('input[name="switchGroupAccuracy"]').on("change", function () {
+            if (this.checked) {
+                const selected = this.id;
+
+                switch (selected) {
+                    case "ages_18_29":
+                        vis.ageIndex = 0;
+                        break;
+                    case "ages_30_44":
+                        vis.ageIndex = 1;
+                        break;
+                    case "ages_45_64":
+                        vis.ageIndex = 2;
+                        break;
+                    case "ages_65":
+                        vis.ageIndex = 3;
+                        break;
+                }
+            }
+
+            vis.wrangleData()
+        });
+
         vis.margin = { top: 10, right: 50, bottom: 10, left: 50 };
         vis.width = document.getElementById(vis.parentElement).getBoundingClientRect().width - vis.margin.left - vis.margin.right;
         vis.height = document.getElementById(vis.parentElement).getBoundingClientRect().height - vis.margin.top - vis.margin.bottom;
-        if (vis.height < 200) vis.height = 500;
 
-        // SVG container
         vis.svg = d3.select("#" + vis.parentElement).append("svg")
             .attr("width", vis.width + vis.margin.left + vis.margin.right)
             .attr("height", vis.height + vis.margin.top + vis.margin.bottom)
             .append("g")
             .attr("transform", `translate(${vis.margin.left},${vis.margin.top})`);
 
-        // Title
         vis.svg.append("text")
             .attr("class", "title target-chart")
             .attr("x", vis.width / 2)
@@ -31,93 +52,90 @@ class AccuracyAgeChart {
             .attr("text-anchor", "middle")
             .text("Accuracy Versus Age");
 
-        // Tooltip
-        vis.tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("opacity", 0);
-        // Legend
-        const legendData = [
-            { label: "AI Accuracy", color: "#3889edff" },
-            { label: "Real Accuracy", color: "#f7902fff" }
-        ];
+        vis.legendSvg = d3.select("#accuracy-versus-age-toggle")
+            .append("svg")
+            .attr("width", 200)
+            .attr("height", 100)
+            .append("g")
+            .attr("transform", "translate(0,0)");
 
-        const legend = vis.svg.append("g")
+        const legend = vis.legendSvg.append("g")
             .attr("class", "legend")
-            .attr("transform", `translate(${vis.width / 2 + 80}, 40)`); // slightly below title
+            .attr("transform", `translate(0, 40)`);
+
+        const legendData = [
+            { color: "#d1814b", label: "AI Accuracy" },
+            { color: "#4b9cd3", label: "Human Accuracy" }
+        ];
 
         legend.selectAll("rect")
             .data(legendData)
             .enter()
             .append("rect")
-            .attr("x", (d, i) => i * 130)  // horizontal spacing
-            .attr("y", 0)
+            .attr("x", 0)
+            .attr("y", (d, i) => i * 30)
             .attr("width", 18)
             .attr("height", 18)
             .attr("fill", d => d.color)
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.5);
 
         legend.selectAll("text.legend-label")
             .data(legendData)
             .enter()
             .append("text")
             .attr("class", "legend-label")
-            .attr("x", (d, i) => i * 130 + 25)
-            .attr("y", 14)
+            .attr("x", 25)
+            .attr("y", (d, i) => i * 30 + 10)
             .text(d => d.label)
             .attr("font-size", "14px")
             .attr("alignment-baseline", "middle");
 
-        // Chart group (centered)
+        vis.tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "1px solid #999")
+            .style("padding", "5px 10px")
+            .style("border-radius", "4px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+
         vis.chartGroup = vis.svg.append("g")
             .attr("transform", `translate(${vis.width / 2},${vis.height / 2})`);
 
-        // Target parameters
         vis.ringCount = 5;
         vis.maxRadius = Math.min(vis.width, vis.height) / 2.5;
         vis.ringThickness = vis.maxRadius / vis.ringCount;
         vis.colors = ["#c83737ff", "#ffffff"];
 
-        // Draw rings
         for (let i = 0; i < vis.ringCount; i++) {
             vis.chartGroup.append("circle")
                 .attr("r", vis.maxRadius - i * vis.ringThickness)
                 .attr("fill", vis.colors[i % 2]);
+
+            vis.chartGroup.append("text")
+                .attr("x", -1 * (vis.maxRadius - i * vis.ringThickness) + 15)  // 5px padding from the left edge
+                .attr("y", 0)
+                .attr("text-anchor", "start")
+                .attr("alignment-baseline", "middle")
+                .attr("fill", i % 2 === 0 ? "#ffffff" : "#c83737ff") // contrast
+                .attr("font-size", "5px")
+                .text(`${25 * (i)}%`);
         }
 
-        // Arrowhead marker
-        let defs = vis.chartGroup.append("defs");
-        defs.append("marker")
-            .attr("id", "arrowhead")
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 10)
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "black");
 
-        // Wrangle data
         this.wrangleData();
     }
 
     wrangleData() {
         let vis = this;
 
-        // Convert numbers & ensure age_group exists
         vis.displayData = vis.data.map(d => ({
             age_group: d.age_group ? d.age_group.replace(/\s+/g, ' ').trim() : "",
             ai: +d.ai,
             real: +d.real
         }));
 
-        // Compute angles for each age group
-        let ageGroups = vis.displayData.map(d => d.age_group);
-        vis.angleScale = d3.scalePoint()
-            .domain(ageGroups)
-            .range([0, 2 * Math.PI]);
+        console.log(vis.displayData);
 
         vis.updateVis();
     }
@@ -125,104 +143,78 @@ class AccuracyAgeChart {
     updateVis() {
         let vis = this;
 
-        // Map accuracy to radius
-        function accuracyToRadius(acc) {
-            const minRadius = 10;
-            return minRadius + (vis.maxRadius - minRadius) * (1 - acc / 100);
-        }
+        vis.chartGroup.selectAll("image").remove();
 
-        const arrowLength = 90;
-        const aiOffset = 5;
-        const realOffset = 15;
-        const groupOffset = 7.5;
+        let dartCenterXPos = 0;
+        let dartCenterYPos = 0;
 
-        // Compute arrow start/end
-        function computeEnd(radius, angle, offset = 0) {
-            const finalAngle = angle + offset;
-            const xStart = radius * Math.cos(finalAngle);
-            const yStart = radius * Math.sin(finalAngle);
-            const xEnd = xStart + arrowLength * Math.cos(finalAngle);
-            const yEnd = yStart + arrowLength * Math.sin(finalAngle);
-            return { xStart, yStart, xEnd, yEnd };
-        }
+        let aiAccuracy = vis.displayData[vis.ageIndex].ai;
+        let realAccuracy = vis.displayData[vis.ageIndex].real;
 
-        // AI arrows
-        ["ai", "real"].forEach((type, typeIndex) => {
-            const color = type === "ai" ? "#3889edff" : "#f7902fff";
-            const data = vis.displayData;
+        let aiAngle = Math.random() * 2 * Math.PI;
+        let realAngle = Math.random() * 2 * Math.PI;
 
-            let darts = vis.chartGroup.selectAll(`.dart-${type}`).data(data);
+        let aiTargetX = (1 - aiAccuracy / 100) * vis.maxRadius * Math.cos(aiAngle);
+        let aiTargetY = (1 - aiAccuracy / 100) * vis.maxRadius * Math.sin(aiAngle);
 
-            const dartEnter = darts.enter()
-                .append("path")
-                .attr("class", `dart-${type}`)
-                .attr("fill", color)
-                .attr("stroke", "black")
-                .attr("stroke-width", 0.8)
-                .attr("opacity", 0.9);
+        let realTargetX = (1 - realAccuracy / 100) * vis.maxRadius * Math.cos(realAngle);
+        let realTargetY = (1 - realAccuracy / 100) * vis.maxRadius * Math.sin(realAngle);
 
-            darts = dartEnter.merge(darts);
+        let aiAngleDeg = Math.atan2(dartCenterYPos - aiTargetY, dartCenterXPos - aiTargetX) * 180 / Math.PI - 90;
+        let realAngleDeg = Math.atan2(dartCenterYPos - realTargetY, dartCenterXPos - realTargetX) * 180 / Math.PI - 90;
 
-        darts.each(function(d, i) {
-            const baseAngle = vis.angleScale(d.age_group);
+        let aiStartX = aiTargetX + 600 * Math.cos(aiAngle);
+        let aiStartY = aiTargetY + 600 * Math.sin(aiAngle);
 
-            const dartsPerType = 4;
-            const spread = 50;
+        let realStartX = realTargetX + 600 * Math.cos(realAngle);
+        let realStartY = realTargetY + 600 * Math.sin(realAngle);
 
-            const baseOffsetDeg = -spread/2 + (i % dartsPerType) * (spread / (dartsPerType - 1));
-            const randomJitterDeg = (Math.random() - 0.5) * 10;
+        vis.chartGroup.append("image")
+            .attr("xlink:href", "resources/dart_ai_accuracy_color.png")
+            .attr("width", 60)
+            .attr("height", 150)
+            .attr("x", aiStartX - 30)
+            .attr("y", aiStartY - 150)
+            .attr("transform", `rotate(${aiAngleDeg}, ${aiStartX}, ${aiStartY})`)
+            .on("mouseover", function (event) {
+                vis.tooltip.transition().duration(200).style("opacity", 0.9);
+                vis.tooltip.html(`Accuracy of correctly identifying a photo as AI generated: ${aiAccuracy}%`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+            })
+            .on("mouseout", function () {
+                vis.tooltip.transition().duration(200).style("opacity", 0);
+            })
+            .transition()
+            .duration(300)
+            .ease(d3.easeCubicOut)
+            .attr("x", aiTargetX - 30)
+            .attr("y", aiTargetY - 150)
+            .attr("transform", `rotate(${aiAngleDeg}, ${aiTargetX}, ${aiTargetY})`);
 
-            let angle = baseAngle + (typeIndex === 0 ? Math.PI : 0); // AI mirrored
-            angle += (typeIndex === 0 ? -1 : 1) * (baseOffsetDeg + randomJitterDeg) * Math.PI / 180;
-
-            const accuracy = type === "ai" ? d.ai : d.real;
-            const baseRadius = accuracyToRadius(accuracy);
-
-            const dartLength = 130;
-            const dartWidth = 6;
-            const bodyLength = dartLength * 0.7;
-            const tailLength = dartLength * 0.3;
-            const halfWidth = dartWidth / 2;
-
-            // Tip at (0,0), tail extends in +X direction
-            const pathData = `
-                M 0,0
-                L ${bodyLength},${-halfWidth}
-                L ${bodyLength + 6},0
-                L ${bodyLength},${halfWidth}
-                L 0,${halfWidth}
-                L ${tailLength * 0.2},${halfWidth * 2}
-                L ${tailLength},${halfWidth}
-                L ${tailLength},${-halfWidth}
-                L ${tailLength * 0.2},${-halfWidth * 2}
-                Z
-            `;
-
-            d3.select(this)
-                .attr("d", pathData)
-                .attr("transform", () => {
-                    const xTip = baseRadius * Math.cos(angle);
-                    const yTip = baseRadius * Math.sin(angle);
-                    const rotation = (angle * 180 / Math.PI);
-                    return `translate(${xTip}, ${yTip}) rotate(${rotation})`;
-                })
-                .on("mouseover", (event, datum) => {
-                    vis.tooltip
-                        .style("opacity", 1)
-                        .style("left", event.pageX + 10 + "px")
-                        .style("top", event.pageY + 10 + "px")
-                        .html(`
-                            <strong>Age:</strong> ${datum.age_group}<br>
-                            <strong>${type === "ai" ? "AI" : "Real"} Accuracy:</strong> ${accuracy}%
-                        `);
-                })
-                .on("mouseout", () => vis.tooltip.style("opacity", 0));
-                }); 
-
-
-            darts.exit().remove();
-        });
-    
+        vis.chartGroup.append("image")
+            .attr("xlink:href", "resources/dart_human_accuracy_color.png")
+            .attr("width", 60)
+            .attr("height", 150)
+            .attr("x", realStartX - 30)
+            .attr("y", realStartY - 150)
+            .attr("transform", `rotate(${realAngleDeg}, ${realStartX}, ${realStartY})`)
+            .on("mouseover", function (event) {
+                vis.tooltip.transition().duration(200).style("opacity", 0.9);
+                vis.tooltip.html(`Accuracy of correctly identifying a photo as real: ${realAccuracy}%`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+            })
+            .on("mouseout", function () {
+                vis.tooltip.transition().duration(200).style("opacity", 0);
+            })
+            .transition()
+            .duration(300)
+            .ease(d3.easeCubicOut)
+            .attr("x", realTargetX - 30)
+            .attr("y", realTargetY - 150)
+            .attr("transform", `rotate(${realAngleDeg}, ${realTargetX}, ${realTargetY})`);
     }
+
 
 }
