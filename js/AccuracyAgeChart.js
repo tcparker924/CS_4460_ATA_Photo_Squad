@@ -64,8 +64,8 @@ class AccuracyAgeChart {
             .attr("transform", `translate(0, 40)`);
 
         const legendData = [
-            { color: "#d1814b", label: "AI Accuracy" },
-            { color: "#4b9cd3", label: "Human Accuracy" }
+            { color: "#d1814b", label: "AI Image Accuracy" },
+            { color: "#4b9cd3", label: "Real Image Accuracy" }
         ];
 
         legend.selectAll("rect")
