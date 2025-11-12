@@ -423,3 +423,36 @@ BEGIN ACCURACY VS AGE CSS SECTION
 END ACCURACY VS CONFIDENCE CSS SECTION
 --------
 */
+
+/*
+--------
+BEGIN CONCLUSION SECTION
+--------
+*/
+
+.conclusion-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conclusion-description {
+    display: flex;
+    width: 50%;
+    align-items: center;
+    justify-content: center;
+}
+
+.conclusion-image {
+    width: 30%;
+    margin-left: 5%;
+    margin-bottom: 5%;
+    width: 100%;
+    height: auto;
+    border-radius: 30%;
+}
+/*
+--------
+END CONCLUSION SECTION
+--------
+*/
